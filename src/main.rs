@@ -3,14 +3,36 @@
 use vgtk::ext::*;
 use vgtk::lib::gio::{ApplicationFlags, SimpleAction, ActionExt};
 use vgtk::lib::gtk::*;
+use vgtk::lib::glib::{object::Cast, types::Type};
 use vgtk::{gtk, run, Component, UpdateAction, VNode};
 
 use anyhow::{Context, Result};
 use async_std::task;
 
-#[derive(Clone, Debug, Default)]
+mod datasets;
+use datasets::Dataset;
+
+#[derive(Clone, Debug)]
 struct Model {
-    datasets: Vec<Dataset>,
+    datasets: TreeStore,
+}
+
+impl Model {
+    fn update_datasets(&mut self, datasets: &[Dataset]) -> Result<()> {
+        self.datasets.clear();
+        for dataset in datasets {
+            dataset.append_to(&self.datasets)?;
+        }
+        Ok(())
+    }
+}
+
+impl Default for Model {
+    fn default() -> Self {
+        Model {
+            datasets: TreeStore::new(Dataset::to_glib_types())
+        }
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -37,13 +59,15 @@ impl Component for Model {
                 Message::DatasetsLoaded(list)
             }),
             Message::DatasetsLoaded(datasets) => {
-                self.datasets = datasets;
+                self.update_datasets(&datasets).unwrap();
                 UpdateAction::Render
             }
         }
     }
 
     fn view(&self) -> VNode<Model> {
+        let model: Option<TreeModel> = Some(self.datasets.clone().upcast());
+
         gtk! {
             <Application::new_unwrap(Some("com.example.zfs-gui-thingy"), ApplicationFlags::empty())>
                 <SimpleAction::new("quit", None) Application::accels=["<Ctrl>q"].as_ref() enabled=true on activate=|a, _| Message::Exit/>
@@ -51,80 +75,22 @@ impl Component for Model {
                 <ApplicationWindow default_width=800 default_height=480 border_width=20 on destroy=|_| Message::Exit>
                     <HeaderBar title="ZFS Datasets" show_close_button=true />
                     <Box orientation=Orientation::Vertical>
-                        <ScrolledWindow Box::expand=true Box::fill=true on show=|_| Message::LoadDatasets>
-                            <ListBox>
-                                {
-                                    self.datasets.iter().enumerate()
-                                        .map(|(index, item)| item.render(index))
+                        <TreeView::new()
+                            model=model
+                            Box::expand=true Box::fill=true
+                            headers_clickable=true
+                            enable_search=true
+                            tooltip_column=0
+                            on show=|tree_view| {
+                                for column in Dataset::to_treeview_columns() {
+                                    tree_view.append_column(&column);
                                 }
-                            </ListBox>
-                        </ScrolledWindow>
+                                Message::LoadDatasets
+                            }>
+                        </TreeView>
                     </Box>
                 </ApplicationWindow>
             </Application>
-        }
-    }
-}
-
-#[derive(Clone, Default, Debug)]
-struct Dataset {
-    pub name: String,
-    pub used: u64,
-    pub compressratio: f64,
-    pub refer: u64,
-    pub avail: u64,
-}
-
-impl Dataset {
-    fn fetch_all() -> Result<Vec<Self>> {
-        let list = std::process::Command::new("zfs")
-            .args(&[
-                "list",
-                "-o",
-                "name,used,compressratio,refer,avail",
-                "-r",
-                "rpool",
-                "-H",
-                "-p",
-            ])
-            .output()
-            .context("failed to run `zfs list`")?;
-        anyhow::ensure!(list.status.success(), "`zfs list` unsuccessful");
-        let list = String::from_utf8(list.stdout).context("parse `zfs list` as UTF-8")?;
-
-        list.trim()
-            .lines()
-            .map(|line| {
-                let mut columns = line.split('\t');
-                let name = columns.next().context("no name column")?.to_string();
-                let used = columns.next().context("no used column")?.parse()?;
-                let compressratio = columns
-                    .next()
-                    .context("no compressratio column")?
-                    .parse()?;
-                let refer = columns.next().context("no refer column")?.parse()?;
-                let avail = columns.next().context("no avail column")?.parse()?;
-                Ok(Dataset {
-                    name,
-                    used,
-                    compressratio,
-                    refer,
-                    avail,
-                })
-            })
-            .collect()
-    }
-
-    fn render(&self, _index: usize) -> VNode<Model> {
-        use humansize::{FileSize, file_size_opts as options};
-
-        gtk! {
-            <ListBoxRow>
-                <Box spacing=10 orientation=Orientation::Horizontal>
-                    <Label label=self.name.clone() use_markup=true Box::fill=true />
-                    <Label label={self.used.file_size(options::BINARY).unwrap_or_else(|_| self.used.to_string())} use_markup=true Box::fill=true />
-                </Box>
-            </ListBoxRow>
         }
     }
 }

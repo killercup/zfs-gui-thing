@@ -3,7 +3,7 @@
 use vgtk::ext::*;
 use vgtk::lib::gio::{ApplicationFlags, SimpleAction, ActionExt};
 use vgtk::lib::gtk::*;
-use vgtk::lib::glib::{object::Cast, types::Type};
+use vgtk::lib::glib::object::Cast;
 use vgtk::{gtk, run, Component, UpdateAction, VNode};
 
 use anyhow::{Context, Result};

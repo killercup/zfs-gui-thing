@@ -1,7 +1,5 @@
-use vgtk::lib::glib::{types::Type};
-use vgtk::{gtk, VNode};
+use vgtk::lib::glib::{types::Type, object::ObjectExt};
 use vgtk::lib::gtk::*;
-use vgtk::lib::glib::object::ObjectExt;
 use anyhow::{Context, Result};
 
 #[derive(Clone, Default, Debug)]
@@ -143,7 +141,7 @@ impl Dataset {
     }
 
     pub fn append_to(&self, tree: &TreeStore) -> Result<()> {
-        use vgtk::lib::{gtk::prelude::TreeStoreExtManual, glib::{TypedValue, Value}};
+        use vgtk::lib::{gtk::prelude::TreeStoreExtManual, glib::{Value}};
         tree.insert_with_values(
             None,
             None,
@@ -157,17 +155,6 @@ impl Dataset {
             ]
         );
         Ok(())
-    }
-
-    fn render(&self, _index: usize) -> VNode<super::Model> {
-        gtk! {
-            <ListBoxRow>
-                <Box spacing=10 orientation=Orientation::Horizontal>
-                    <Label label=self.name.clone() use_markup=true Box::fill=true />
-                    <Label label={self.used.file_size(options::BINARY).unwrap_or_else(|_| self.used.to_string())} use_markup=true Box::fill=true />
-                </Box>
-            </ListBoxRow>
-        }
     }
 }
 

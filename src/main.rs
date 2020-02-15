@@ -6,6 +6,7 @@ use vgtk::lib::gtk::*;
 use vgtk::{gtk, run, Component, UpdateAction, VNode};
 
 use anyhow::{Context, Result};
+use async_std::task;
 
 #[derive(Clone, Debug, Default)]
 struct Model {
@@ -29,8 +30,11 @@ impl Component for Model {
                 vgtk::quit();
                 UpdateAction::None
             }
-            Message::LoadDatasets => UpdateAction::defer(async move {
-                Message::DatasetsLoaded(Dataset::fetch_all().context("load datasets").unwrap())
+            Message::LoadDatasets => UpdateAction::defer(async {
+                let list = task::spawn(async {
+                    Dataset::fetch_all().context("load datasets").unwrap()
+                }).await;
+                Message::DatasetsLoaded(list)
             }),
             Message::DatasetsLoaded(datasets) => {
                 self.datasets = datasets;
@@ -112,11 +116,13 @@ impl Dataset {
     }
 
     fn render(&self, _index: usize) -> VNode<Model> {
+        use humansize::{FileSize, file_size_opts as options};
+
         gtk! {
             <ListBoxRow>
                 <Box spacing=10 orientation=Orientation::Horizontal>
                     <Label label=self.name.clone() use_markup=true Box::fill=true />
-                    <Label label={human_format::Formatter::new().with_scales(human_format::Scales::Binary()).format(self.used as f64)} use_markup=true Box::fill=true />
+                    <Label label={self.used.file_size(options::BINARY).unwrap_or_else(|_| self.used.to_string())} use_markup=true Box::fill=true />
                 </Box>
             </ListBoxRow>
         }

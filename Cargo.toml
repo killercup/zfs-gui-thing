@@ -5,7 +5,7 @@ authors = ["Pascal Hertleif <killercup@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-vgtk = "0.1.0"
+vgtk = { version = "0.1.0", git = "https://github.com/killercup/vgtk.git", branch = "tree-dance"}
 pretty_env_logger = "0.4.0"
 anyhow = "1.0.26"
 humansize = "1.1.0"

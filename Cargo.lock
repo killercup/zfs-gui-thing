@@ -294,6 +294,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "darling"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0d706e75d87e35569db781a9b5e2416cff1236a47ed380831f959382ccd5f858"
+dependencies = [
+ "darling_core",
+ "darling_macro",
+]
+
+[[package]]
+name = "darling_core"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f0c960ae2da4de88a91b2d920c2a7233b400bc33cb28453a2987822d8392519b"
+dependencies = [
+ "fnv",
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "strsim",
+ "syn",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.10.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d9b5a2f4ac4969822c62224815d069952656cadc7084fdca9751e6d959189b72"
+dependencies = [
+ "darling_core",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "diff"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -370,6 +405,12 @@ name = "fixedbitset"
 version = "0.1.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "86d4de0081402f5e88cdac65c8dcdcc73118c1a7a465e2a05f0da05843a8ea33"
+
+[[package]]
+name = "fnv"
+version = "1.0.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2fad85553e09a6f881f739c29f0b00b0f01357c743266d478b68951ce23285f3"
 
 [[package]]
 name = "fuchsia-cprng"
@@ -725,6 +766,12 @@ checksum = "df004cfca50ef23c36850aaaa59ad52cc70d0e90243c3c7737a4dd32dc7a3c4f"
 dependencies = [
  "quick-error",
 ]
+
+[[package]]
+name = "ident_case"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "iovec"
@@ -1397,7 +1444,26 @@ checksum = "078775d0255232fb988e6fccf26ddc9d1ac274299aaedcedce21c6f72cc533ce"
 [[package]]
 name = "vgtk"
 version = "0.1.0"
-source = "git+https://github.com/killercup/vgtk.git?branch=tree-dance#4736e937f1b731ea33334117640c041cffb5b154"
+source = "git+https://github.com/killercup/vgtk.git?branch=tree-dance#f669309f6383d4fdb5e3e8383b2f0ca519f8aa82"
+dependencies = [
+ "colored",
+ "futures",
+ "gdk",
+ "gdk-pixbuf",
+ "gio",
+ "glib",
+ "gtk",
+ "log",
+ "proc-macro-hack",
+ "proc-macro-nested",
+ "vgtk-macros",
+]
+
+[[package]]
+name = "vgtk"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c3dfe290389bf04350fa966e5ae7b87af612d87bbe0966f54c4811fa0c8d1b8"
 dependencies = [
  "colored",
  "futures",
@@ -1424,6 +1490,24 @@ dependencies = [
  "proc-macro2",
  "quote",
  "version_check",
+]
+
+[[package]]
+name = "vgtk_treeview"
+version = "0.1.0"
+dependencies = [
+ "vgtk 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vgtk_treeview_macros",
+]
+
+[[package]]
+name = "vgtk_treeview_macros"
+version = "0.1.0"
+dependencies = [
+ "darling",
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
@@ -1492,6 +1576,9 @@ dependencies = [
  "anyhow",
  "async-std",
  "humansize",
+ "log",
  "pretty_env_logger",
- "vgtk",
+ "vgtk 0.1.0 (git+https://github.com/killercup/vgtk.git?branch=tree-dance)",
+ "vgtk_treeview",
+ "vgtk_treeview_macros",
 ]

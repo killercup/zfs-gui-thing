@@ -1,13 +1,14 @@
 #![recursion_limit = "1024"]
 
 use vgtk::ext::*;
-use vgtk::lib::gio::{ApplicationFlags, SimpleAction, ActionExt};
-use vgtk::lib::gtk::*;
+use vgtk::lib::gio::{ActionExt, ApplicationFlags, SimpleAction};
 use vgtk::lib::glib::object::Cast;
+use vgtk::lib::gtk::*;
 use vgtk::{gtk, run, Component, UpdateAction, VNode};
 
 use anyhow::{Context, Result};
 use async_std::task;
+use vgtk_treeview::*;
 
 mod datasets;
 use datasets::Dataset;
@@ -30,7 +31,7 @@ impl Model {
 impl Default for Model {
     fn default() -> Self {
         Model {
-            datasets: TreeStore::new(Dataset::to_glib_types())
+            datasets: TreeStore::new(&Dataset::to_glib_types()),
         }
     }
 }
@@ -53,9 +54,9 @@ impl Component for Model {
                 UpdateAction::None
             }
             Message::LoadDatasets => UpdateAction::defer(async {
-                let list = task::spawn(async {
-                    Dataset::fetch_all().context("load datasets").unwrap()
-                }).await;
+                let list =
+                    task::spawn(async { Dataset::fetch_all().context("load datasets").unwrap() })
+                        .await;
                 Message::DatasetsLoaded(list)
             }),
             Message::DatasetsLoaded(datasets) => {

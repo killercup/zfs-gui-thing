@@ -52,6 +52,61 @@ impl Dataset {
             })
             .collect()
     }
+
+    pub fn fetch_snapshots() -> Result<Vec<(String, Self)>> {
+        let list = std::process::Command::new("zfs")
+            .args(&[
+                "list",
+                "-t",
+                "snapshot",
+                "-o",
+                "name,used,compressratio,refer",
+                "-r",
+                "-H",
+                "-p",
+            ])
+            .output()
+            .context("run `zfs list -t snapshot`")?;
+        anyhow::ensure!(list.status.success(), "`zfs list -t snapshot` unsuccessful");
+        let list =
+            String::from_utf8(list.stdout).context("parse `zfs list -t snapshot` as UTF-8")?;
+
+        list.trim()
+            .lines()
+            .map(|line| {
+                let mut columns = line.split('\t');
+                let name = columns
+                    .next()
+                    .context("name")?
+                    .splitn(2, '@')
+                    .collect::<Vec<_>>();
+                anyhow::ensure!(
+                    name.len() == 2,
+                    "expected name to be like x@y, was {:?}",
+                    name
+                );
+                let (dataset_name, snapshot_name) = (name[0].to_string(), name[1].to_string());
+                let used = columns.next().context("used")?.parse().context("used")?;
+                let compressratio = columns
+                    .next()
+                    .context("compressratio")?
+                    .parse()
+                    .context("compressratio")?;
+                let refer = columns.next().context("refer")?.parse().context("refer")?;
+                let avail = 0; // n/a for snapshots
+                Ok((
+                    dataset_name,
+                    Dataset {
+                        name: snapshot_name,
+                        used,
+                        compressratio,
+                        refer,
+                        avail,
+                    },
+                ))
+            })
+            .collect()
+    }
 }
 
 use humansize::{file_size_opts as options, FileSize};

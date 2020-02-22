@@ -2,6 +2,8 @@
 
 Quick experiment for rendering nested `zfs list` output with [vgtk].
 
+![Screenshot](https://user-images.githubusercontent.com/20063/75100200-0d6a1700-55cb-11ea-9847-683798d4eae1.png)
+
 ## Run
 
 Use `nix-shell` or install [whatever gtk needs][req], then `cargo run`.

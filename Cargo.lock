@@ -187,9 +187,9 @@ checksum = "08c48aae112d48ed9f069b33538ea9e3e90aa263cfa3d1c24309612b1f7472de"
 
 [[package]]
 name = "cairo-rs"
-version = "0.8.0"
+version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b528aca2ef1026235d0122495dbaee0b09479f77c51f6df8d9bb9cb1c6d6f87"
+checksum = "157049ba9618aa3a61c39d5d785102c04d3b1f40632a706c621a9aedc21e6084"
 dependencies = [
  "bitflags",
  "cairo-sys-rs",
@@ -745,9 +745,9 @@ dependencies = [
 
 [[package]]
 name = "hermit-abi"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "eff2656d88f158ce120947499e971d743c05dbcbed62e5bd2f38f1698bbc3772"
+checksum = "e2c55f143919fbc0bc77e427fe2d74cf23786d7c1875666f2fde3ac3c659bb67"
 dependencies = [
  "libc",
 ]
@@ -849,9 +849,9 @@ checksum = "e2abad23fbc42b3700f2f279844dc832adb2b2eb069b2df918f455c4e18cc646"
 
 [[package]]
 name = "libc"
-version = "0.2.66"
+version = "0.2.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d515b1f41455adea1313a4a2ac8a8a477634fbae63cc6100e3aebb207ce61558"
+checksum = "eb147597cdf94ed43ab7a9038716637d2d1bf2bc571da995d0028dec06bd3018"
 
 [[package]]
 name = "log"
@@ -864,9 +864,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.3.2"
+version = "2.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "53445de381a1f436797497c61d851644d0e8e88e6140f22872ad33a704933978"
+checksum = "3728d817d99e5ac407411fa471ff9800a778d88a24685968b36824eaf4bee400"
 
 [[package]]
 name = "memoffset"
@@ -1274,9 +1274,9 @@ checksum = "29f07eb7d2295b0db2dc3f4d0e995b3a2751ba08173529d2f23fcc0e54312e8f"
 
 [[package]]
 name = "scopeguard"
-version = "1.0.0"
+version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b42e15e59b18a828bbf5c58ea01debb36b9b096346de35d941dcb89009f24a0d"
+checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "semver"
@@ -1379,9 +1379,9 @@ checksum = "6446ced80d6c486436db5c078dde11a9f73d42b57fb273121e160b84f63d894c"
 
 [[package]]
 name = "syn"
-version = "1.0.14"
+version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af6f3550d8dff9ef7dc34d384ac6f107e5d31c8f57d9f28e0081503f547ac8f5"
+checksum = "7a0294dc449adc58bb6592fff1a23d3e5e6e235afc6a0ffca2657d19e7bbffe5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -1443,27 +1443,9 @@ checksum = "078775d0255232fb988e6fccf26ddc9d1ac274299aaedcedce21c6f72cc533ce"
 
 [[package]]
 name = "vgtk"
-version = "0.1.0"
-source = "git+https://github.com/killercup/vgtk.git?branch=tree-dance#f669309f6383d4fdb5e3e8383b2f0ca519f8aa82"
-dependencies = [
- "colored",
- "futures",
- "gdk",
- "gdk-pixbuf",
- "gio",
- "glib",
- "gtk",
- "log",
- "proc-macro-hack",
- "proc-macro-nested",
- "vgtk-macros",
-]
-
-[[package]]
-name = "vgtk"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0c3dfe290389bf04350fa966e5ae7b87af612d87bbe0966f54c4811fa0c8d1b8"
+checksum = "d7ca2d7a305f5b6dc60028196160551846ee3399cb9f6d6c96ea4a04d6da5bb1"
 dependencies = [
  "colored",
  "futures",
@@ -1480,9 +1462,9 @@ dependencies = [
 
 [[package]]
 name = "vgtk-macros"
-version = "0.1.0"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00c5eba455f2c6f190e886d81b4f5db32fd09ead1b958080354ffff50415ccd8"
+checksum = "1145573d2d3c26cf268af849314be97e1eac5b1aff416cc148310250db7acd17"
 dependencies = [
  "lalrpop",
  "lalrpop-util",
@@ -1496,7 +1478,7 @@ dependencies = [
 name = "vgtk_treeview"
 version = "0.1.0"
 dependencies = [
- "vgtk 0.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "vgtk",
  "vgtk_treeview_macros",
 ]
 
@@ -1578,7 +1560,7 @@ dependencies = [
  "humansize",
  "log",
  "pretty_env_logger",
- "vgtk 0.1.0 (git+https://github.com/killercup/vgtk.git?branch=tree-dance)",
+ "vgtk",
  "vgtk_treeview",
  "vgtk_treeview_macros",
 ]

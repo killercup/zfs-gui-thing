@@ -1,7 +1,7 @@
 use darling::FromField;
 use proc_macro::TokenStream;
-use quote::{quote, ToTokens};
-use syn::{parse_macro_input, Data, DataStruct, DeriveInput, Field};
+use quote::{quote, quote_spanned, ToTokens};
+use syn::{parse_macro_input, spanned::Spanned, Data, DataStruct, DeriveInput, Field};
 
 pub fn expand(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
@@ -9,11 +9,16 @@ pub fn expand(input: TokenStream) -> TokenStream {
     let name = input.ident;
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
     let columns = collect_columns(&input.data);
+    let append_to = build_append_to(&input.data);
 
     let expanded = quote! {
         impl #impl_generics vgtk_treeview::ToTreeViewColumns for #name #ty_generics #where_clause {
             fn to_treeview_columns() -> Vec<vgtk::lib::gtk::TreeViewColumn> {
                 #columns
+            }
+
+            fn append_to_treestore(&self, tree: &TreeStore) {
+                #append_to
             }
         }
     };
@@ -98,4 +103,37 @@ fn build_column(field: &Field, idx: usize) -> Result<impl ToTokens, syn::Error> 
 
         x
     })
+}
+
+fn build_append_to(data: &Data) -> impl ToTokens {
+    let fields = match data {
+        Data::Struct(DataStruct { fields, .. }) => fields,
+        _ => unimplemented!("Can only derive `ToTreeViewColumns` for structs for now"),
+    };
+
+    let column_indices = fields
+        .iter()
+        .enumerate()
+        .map(|(idx, f)| quote_spanned!(f.span() => { #idx as u32 }));
+    let column_mapping = quote! {
+        &[ #( #column_indices ),* ]
+    };
+
+    let field_names = fields.iter().map(|f| {
+        let name = &f.ident;
+        quote_spanned!(f.span() => { &Value::from(&self.#name) })
+    });
+    let field_mapping = quote! {
+        &[ #( #field_names ),* ]
+    };
+
+    quote! {
+        use vgtk::lib::{glib::Value, gtk::prelude::TreeStoreExtManual};
+        tree.insert_with_values(
+            None,
+            None,
+            #column_mapping,
+            #field_mapping,
+        );
+    }
 }

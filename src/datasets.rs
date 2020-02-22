@@ -18,7 +18,7 @@ pub struct Dataset {
 }
 
 impl Dataset {
-    pub fn fetch_all() -> Result<Vec<Self>> {
+    pub fn fetch_datasets() -> Result<Vec<Self>> {
         let list = std::process::Command::new("zfs")
             .args(&[
                 "list",
@@ -51,23 +51,6 @@ impl Dataset {
                 })
             })
             .collect()
-    }
-
-    pub fn append_to(&self, tree: &TreeStore) -> Result<()> {
-        use vgtk::lib::{glib::Value, gtk::prelude::TreeStoreExtManual};
-        tree.insert_with_values(
-            None,
-            None,
-            &[0, 1, 2, 3, 4],
-            &[
-                &Value::from(&self.name),
-                &Value::from(&self.used),
-                &Value::from(&self.compressratio),
-                &Value::from(&self.refer),
-                &Value::from(&self.avail),
-            ],
-        );
-        Ok(())
     }
 }
 

@@ -11,6 +11,7 @@ pub trait ToGlibTypes {
 
 pub trait ToTreeViewColumns {
     fn to_treeview_columns() -> Vec<TreeViewColumn>;
+    fn append_to_treestore(&self, tree: &TreeStore);
 }
 
 #[derive(Clone, Debug)]

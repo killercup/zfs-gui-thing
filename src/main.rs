@@ -22,7 +22,7 @@ impl Model {
     fn update_datasets(&mut self, datasets: &[Dataset]) -> Result<()> {
         self.datasets.clear();
         for dataset in datasets {
-            dataset.append_to(&self.datasets)?;
+            dataset.append_to_treestore(&self.datasets);
         }
         Ok(())
     }
@@ -54,9 +54,10 @@ impl Component for Model {
                 UpdateAction::None
             }
             Message::LoadDatasets => UpdateAction::defer(async {
-                let list =
-                    task::spawn(async { Dataset::fetch_all().context("load datasets").unwrap() })
-                        .await;
+                let list = task::spawn(async {
+                    Dataset::fetch_datasets().context("load datasets").unwrap()
+                })
+                .await;
                 Message::DatasetsLoaded(list)
             }),
             Message::DatasetsLoaded(datasets) => {

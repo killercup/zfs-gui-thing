@@ -1,7 +1,7 @@
 use std::marker::PhantomData;
 use vgtk::lib::{
     glib::types::Type,
-    gtk::{TreeStore, TreeViewColumn},
+    gtk::{TreeIter, TreeStore, TreeViewColumn},
 };
 pub use vgtk_treeview_macros::*;
 
@@ -11,7 +11,7 @@ pub trait ToGlibTypes {
 
 pub trait ToTreeViewColumns {
     fn to_treeview_columns() -> Vec<TreeViewColumn>;
-    fn append_to_treestore(&self, tree: &TreeStore);
+    fn append_to_treestore(&self, tree: &TreeStore, parent: Option<&TreeIter>);
 }
 
 #[derive(Clone, Debug)]

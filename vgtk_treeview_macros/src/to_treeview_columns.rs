@@ -17,7 +17,7 @@ pub fn expand(input: TokenStream) -> TokenStream {
                 #columns
             }
 
-            fn append_to_treestore(&self, tree: &TreeStore) {
+            fn append_to_treestore(&self, tree: &TreeStore, parent: Option<&TreeIter>) {
                 #append_to
             }
         }
@@ -129,8 +129,9 @@ fn build_append_to(data: &Data) -> impl ToTokens {
 
     quote! {
         use vgtk::lib::{glib::Value, gtk::prelude::TreeStoreExtManual};
+
         tree.insert_with_values(
-            None,
+            parent,
             None,
             #column_mapping,
             #field_mapping,

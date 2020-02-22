@@ -1,8 +1,11 @@
 [package]
 name = "vgtk_treeview"
+description = "work with gtk treeviews with less pain"
 version = "0.1.0"
 authors = ["Pascal Hertleif <killercup@gmail.com>"]
 edition = "2018"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/killercup/zfs-gui-thing"
 
 [dependencies]
 vgtk = "0.2.0"

@@ -1,8 +1,11 @@
 [package]
 name = "zfs-gui-thing"
+description = "GTK app that fancies up `zfs list`"
+publish = false
 version = "0.1.0"
 authors = ["Pascal Hertleif <killercup@gmail.com>"]
 edition = "2018"
+license = "MIT OR Apache-2.0"
 
 [dependencies]
 vgtk = { version = "0.2.0" }

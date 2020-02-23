@@ -8,5 +8,5 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/killercup/zfs-gui-thing"
 
 [dependencies]
-vgtk = "0.2.0"
+vgtk = { version = "0.2.0", git = "https://github.com/bodil/vgtk/" }
 vgtk_treeview_macros = { path = "../vgtk_treeview_macros/" }

@@ -1,17 +1,33 @@
 #![recursion_limit = "1024"]
 
 use vgtk::ext::*;
-use vgtk::lib::gio::{ActionExt, ApplicationFlags, SimpleAction};
+use vgtk::lib::gio::{prelude::ApplicationExtManual, ActionExt, ApplicationFlags, SimpleAction};
 use vgtk::lib::glib::object::Cast;
 use vgtk::lib::gtk::*;
-use vgtk::{gtk, run, Component, UpdateAction, VNode};
+use vgtk::{gtk, Component, UpdateAction, VNode};
 
 use anyhow::{Context, Result};
-use async_std::task;
 use vgtk_treeview::*;
 
 mod datasets;
 use datasets::Dataset;
+fn main() {
+    pretty_env_logger::init();
+    let (app, scope) = vgtk::start::<Model>();
+
+    let _worker = std::thread::spawn(move || {
+        let datasets = Dataset::fetch_datasets().context("load datasets").unwrap();
+        scope.send_message(Message::UpdateDatasets(datasets));
+        let snapshots = Dataset::fetch_snapshots()
+            .context("load snapshots")
+            .unwrap();
+        scope.send_message(Message::InsertSnapshots(snapshots));
+    });
+
+    let args: Vec<String> = std::env::args().collect();
+    let exit_status = app.run(&args);
+    std::process::exit(exit_status);
+}
 
 #[derive(Clone, Debug)]
 struct Model {
@@ -60,8 +76,9 @@ impl Default for Model {
 
 #[derive(Clone, Debug)]
 enum Message {
-    LoadDatasets,
-    DatasetsLoaded((Vec<Dataset>, Vec<(String, Dataset)>)),
+    Init,
+    UpdateDatasets(Vec<Dataset>),
+    InsertSnapshots(Vec<(String, Dataset)>),
     Exit,
 }
 
@@ -75,20 +92,15 @@ impl Component for Model {
                 vgtk::quit();
                 UpdateAction::None
             }
-            Message::LoadDatasets => UpdateAction::defer(async {
-                let list = task::spawn(async {
-                    (
-                        Dataset::fetch_datasets().context("load datasets").unwrap(),
-                        Dataset::fetch_snapshots()
-                            .context("load snapshots")
-                            .unwrap(),
-                    )
-                })
-                .await;
-                Message::DatasetsLoaded(list)
-            }),
-            Message::DatasetsLoaded((datasets, snapshots)) => {
+            Message::Init => {
+                log::info!("hello");
+                UpdateAction::None
+            }
+            Message::UpdateDatasets(datasets) => {
                 self.update_datasets(&datasets).unwrap();
+                UpdateAction::Render
+            }
+            Message::InsertSnapshots(snapshots) => {
                 self.update_datasets_with_snapshots(&snapshots).unwrap();
                 UpdateAction::Render
             }
@@ -115,7 +127,7 @@ impl Component for Model {
                                     for column in Dataset::to_treeview_columns() {
                                         tree_view.append_column(&column);
                                     }
-                                    Message::LoadDatasets
+                                    Message::Init
                                 }>
                             </TreeView>
                         </ScrolledWindow>
@@ -124,9 +136,4 @@ impl Component for Model {
             </Application>
         }
     }
-}
-
-fn main() {
-    pretty_env_logger::init();
-    std::process::exit(run::<Model>());
 }

@@ -1,11 +1,11 @@
 use anyhow::{Context, Result};
-use vgtk::lib::glib::object::ObjectExt;
+use vgtk::lib::glib::{object::ObjectExt, prelude::*};
 use vgtk::lib::gtk::*;
 use vgtk_treeview::*;
 
 #[derive(Clone, Default, Debug, ToGlibTypes, ToTreeViewColumns)]
 pub struct Dataset {
-    #[tree_view_column(name = "Dataset")]
+    #[tree_view_column(name = "Dataset", presenter = "path_segments")]
     pub name: String,
     #[tree_view_column(name = "Used", presenter = "human_format")]
     pub used: u64,
@@ -15,6 +15,22 @@ pub struct Dataset {
     pub refer: u64,
     #[tree_view_column(name = "Available", presenter = "human_format")]
     pub avail: u64,
+    #[tree_view_column(name = "Type")]
+    pub kind: Type,
+}
+
+#[derive(Debug, Eq, PartialEq, Clone, Copy, glib_macros::GEnum)]
+#[repr(u32)]
+#[genum(type_name = "TestAnimalType")]
+pub enum Type {
+    Dataset,
+    Snapshot,
+}
+
+impl Default for Type {
+    fn default() -> Type {
+        Type::Dataset
+    }
 }
 
 impl Dataset {
@@ -48,6 +64,7 @@ impl Dataset {
                     compressratio,
                     refer,
                     avail,
+                    kind: Type::Dataset,
                 })
             })
             .collect()
@@ -102,6 +119,7 @@ impl Dataset {
                         compressratio,
                         refer,
                         avail,
+                        kind: Type::Snapshot,
                     },
                 ))
             })
@@ -114,4 +132,8 @@ use humansize::{file_size_opts as options, FileSize};
 fn human_format(x: impl FileSize + ToString) -> String {
     x.file_size(options::BINARY)
         .unwrap_or_else(|_| x.to_string())
+}
+
+fn path_segments(x: String) -> String {
+    x.split('/').last().map(|x| x.to_string()).unwrap_or(x)
 }

@@ -1,6 +1,8 @@
 use darling::FromField;
+use heck::ShoutySnakeCase;
 use proc_macro::TokenStream;
 use quote::{quote, quote_spanned, ToTokens};
+use std::convert::TryFrom;
 use syn::{parse_macro_input, spanned::Spanned, Data, DataStruct, DeriveInput, Field};
 
 pub fn expand(input: TokenStream) -> TokenStream {
@@ -10,8 +12,12 @@ pub fn expand(input: TokenStream) -> TokenStream {
     let (impl_generics, ty_generics, where_clause) = input.generics.split_for_impl();
     let columns = collect_columns(&input.data);
     let append_to = build_append_to(&input.data);
+    let column_indices = collect_column_indices(&input.data);
 
     let expanded = quote! {
+        impl #impl_generics #name #ty_generics {
+            #column_indices
+        }
         impl #impl_generics vgtk_treeview::ToTreeViewColumns for #name #ty_generics #where_clause {
             fn to_treeview_columns() -> Vec<vgtk::lib::gtk::TreeViewColumn> {
                 #columns
@@ -24,6 +30,33 @@ pub fn expand(input: TokenStream) -> TokenStream {
     };
 
     TokenStream::from(expanded)
+}
+
+fn collect_column_indices(data: &Data) -> impl ToTokens {
+    match data {
+        Data::Struct(DataStruct { fields, .. }) => {
+            let items = fields.iter().enumerate().map(|(idx, f)| {
+                let idx = i32::try_from(idx).expect("more than i32::MAX fields, wow");
+                let column_index_ident = syn::Ident::new(
+                    &format!(
+                        "{}_COLUMN_INDEX",
+                        f.ident
+                            .as_ref()
+                            .expect("struct field has ident")
+                            .to_string()
+                            .to_shouty_snake_case()
+                    ),
+                    f.ident.span(),
+                );
+                quote_spanned!(f.span() =>
+                    #[allow(dead_code)]
+                    pub const #column_index_ident: i32 = #idx;
+                )
+            });
+            quote!( #( #items )* )
+        }
+        _ => unimplemented!("Can only derive GLib types for structs for now"),
+    }
 }
 
 fn collect_columns(data: &Data) -> impl ToTokens {
